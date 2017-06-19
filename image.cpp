@@ -5,20 +5,56 @@
 
 
 Image::Image(int w, int h)	{
-    width=w;
-    height=h;
-    
-    data = (unsigned char *)calloc(w*3,h);
-    if(data == NULL)	{
-      printf("Out of memory allocating %dx%d images\n",w,h);
-      abort();
-    }
+  InitImage(w,h,NULL);
 }
 
+Image::Image(int w, int h, unsigned char *clonedata)	{
+  InitImage(w,h,clonedata);
+}
+
+void Image::InitImage(int w, int h, unsigned char *clonedata)	{
+    width=w;
+    height=h;
+
+    dataptr = clonedata;
+    datastore = NULL;
+    
+    // If we're creating an image from scratch, use this
+    if(!clonedata)	{
+      datastore = (unsigned char *)calloc(w*3,h);
+      if(!datastore)	{
+	printf("Out of memory allocating %dx%d image\n",w,h);
+	abort();
+      }
+      dataptr = datastore;
+    }
+
+    // Now build a list of row pointers
+    rowlist = (unsigned char **)calloc(sizeof(char *),h);
+    if(rowlist == NULL)	{
+      printf("Out of memory allocating %d rows\n",h);
+      abort();
+    }
+
+    // Set up the offsets
+    long width3 = width*3;
+    unsigned char *pos = dataptr;
+    for(int ctr=0;ctr<h;ctr++)	{
+      rowlist[ctr] = pos;
+      pos += width3;
+    }
+    
+}
+
+
 Image::~Image()	{
-    if(data)	{
-      free(data);
-      data=NULL;
+    if(datastore)	{
+      free(datastore);
+      datastore=NULL;
+    }
+    if(rowlist)	{
+      free(rowlist);
+      rowlist=NULL;
     }
 }
 
@@ -27,8 +63,11 @@ Image::~Image()	{
 
 
 unsigned char *Image::getRowStart(int y)	{
-  long offset = y*width*3;
-  return data+offset;
+  if(y<0 || y>=height)	{
+    return NULL;
+  }
+  
+  return rowlist[y];
 }
 
 
@@ -55,7 +94,7 @@ int Image::isRowBlank(int y)	{
 
 
 int Image::isColBlank(int x)	{
-  unsigned char *ptr = getRowStart(0);
+  unsigned char *ptr = NULL;
   unsigned char r,g,b;
   long offset = x*3;
 
@@ -63,11 +102,8 @@ int Image::isColBlank(int x)	{
     return 1;
   }
   
-  ptr += offset;	// Move to the X coordinate we're interested in
-  
-  offset = (width-1)*3;	// this is now the offset to move the pointer to the next row
-  
   for(int ctr=0;ctr<height;ctr++)	{
+    ptr = getRowStart(ctr)+offset;	// Move to the X coordinate we're interested in
     r = *ptr++;
     g = *ptr++;
     b = *ptr++;
@@ -75,8 +111,6 @@ int Image::isColBlank(int x)	{
     if(r || g || b)	{
       return 0;
     }
-    
-    ptr += offset;
   }
   
   return 1;
@@ -170,8 +204,58 @@ int Image::getColCount()	{
   return cols;
 }
 
-
+//
+//  Create a sub-image by address - DON'T free the main image until you're sure you're finished with it!
+//
 Image *Image::makeSubImage(int x, int y, int w, int h)	{
+
+  int x2,y2,pos;
+  long offset;
+  
+  if(x<0)
+      x=0;
+  if(y<0)
+      y=0;
+  if(x>=width)
+      x=width-1;
+  if(y>=height)
+      y=height-1;
+  
+  x2=x+w;
+  y2=y+h;
+
+  if(x2 >= width)
+    x2=width;
+  if(y2 >= height)
+    y2=height;
+  
+  if(x2<=x)
+    return NULL;
+  if(y2<=y)
+    return NULL;
+
+  // Now convert it back to relative coordinates in case it clipped
+  w=x2-x;
+  h=y2-y;
+  
+  Image *newImage = new Image(w,h,dataptr);	// Clone the image from our original datastore
+
+  // Now simply rebuild the rowlist in the new image to point to bits of the old one
+  
+  offset = x*3;
+  pos=0;
+  for(int a=y;a<y2;a++)	{
+    newImage->rowlist[pos++]=getRowStart(a)+offset;
+  }
+  
+  return newImage;
+  
+}
+
+//
+// Create a sub-image by copy (not currently used anymore)
+//
+Image *Image::copySubImage(int x, int y, int w, int h)	{
 
   int x2,y2,wbytes;
   unsigned char *inptr,*outptr;
@@ -206,7 +290,7 @@ Image *Image::makeSubImage(int x, int y, int w, int h)	{
   
   Image *newImage = new Image(w,h);
   
-  outptr = newImage->data;
+  outptr = newImage->datastore;
   inptr = getRowStart(y);
   inptr += (x*3); // Start of segment
   offset = width * 3;

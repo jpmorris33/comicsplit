@@ -5,6 +5,7 @@
 
 all: comicsplit
 
+OUTFILE		  = comicsplit
 CC                = g++
 CFLAGS            = -I. -g -O6 -Wall
 LD		  = g++
@@ -15,7 +16,7 @@ Object_files   = main.o image.o process.o readpng.o writepng.o
 
 comicsplit: $(Object_files)
 	-rm -f $(comicsplit)
-	$(LD)  $^ $(comicsplit) $(LDFLAGS) -o comicsplit
+	$(LD)  $^ $(comicsplit) $(LDFLAGS) -o $(OUTFILE)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -30,5 +31,4 @@ comicsplit: $(Object_files)
 	$(ASM) -f coff $< -o $@
 
 clean:
-	rm -f *.o $(comicsplit)
-	rm -f comicsplit
+	rm -f *.o $(OUTFILE)

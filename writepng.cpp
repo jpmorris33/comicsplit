@@ -63,6 +63,8 @@ int writePNG(const char* filename, Image *img)
 			8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
 			PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
+//	png_set_compression_level(pngptr,Z_BEST_SPEED);
+
 	png_write_info(pngptr, infoptr);
 
 	

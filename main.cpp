@@ -8,7 +8,7 @@ extern void process(const char *filein);
 
 int main(int argc, char *argv[])	{
   
-printf("comicsplit 1.01\n");
+printf("comicsplit 1.50\n");
 
 if(argc < 2)	{
     printf("Usage: comicsplit <file.png>\n");
@@ -16,5 +16,7 @@ if(argc < 2)	{
 }  
 
 process(argv[1]);
+
+return 0;
 }
 

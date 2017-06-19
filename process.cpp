@@ -13,7 +13,7 @@ Image **SplitImageHorizontally(Image *img, int *cols);
 
 
 void process(const char *filein)	{
-int vlen,hlen,filenum;
+int vlen,hlen,filenum,x,y;
 char fileout[1024];
 char filename[1024];
 char *extptr;
@@ -48,16 +48,16 @@ if(!mainImage)	{
 filenum = 1;
 
 Image **vlist = SplitImageVertically(mainImage,&vlen);
-delete mainImage;
 
 if(!vlist)	{
   printf("Nothing to do\n");
+  delete mainImage;
   return;
 }
 
 // Go through the rows and split them into columns
 
-for(int y=0;y<vlen;y++)	{
+for(y=0;y<vlen;y++)	{
   Image **hlist = SplitImageHorizontally(vlist[y],&hlen);
   
   if(!hlist)	{
@@ -66,7 +66,7 @@ for(int y=0;y<vlen;y++)	{
   
   // Split the columns into individual cels and save them
 
-  for(int x=0;x<hlen;x++)	{
+  for(x=0;x<hlen;x++)	{
     sprintf(fileout,"%s_%02d.%s",filename,filenum++,extptr);
     printf("Save file to %s\n",fileout);
     
@@ -75,7 +75,7 @@ for(int y=0;y<vlen;y++)	{
   }
   
   // Now free the images
-  for(int x=0;x<hlen;x++)	{
+  for(x=0;x<hlen;x++)	{
     delete hlist[x];
   }
   free(hlist);
@@ -84,12 +84,13 @@ for(int y=0;y<vlen;y++)	{
   
 
 // Now free the rest of the images
-for(int y=0;y<vlen;y++)	{
+for(y=0;y<vlen;y++)	{
     delete vlist[y];
 }
 free(vlist);
 vlist=NULL;
 
+delete mainImage;
 printf("done\n");
 }
 
