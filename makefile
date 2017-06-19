@@ -31,3 +31,4 @@ comicsplit: $(Object_files)
 
 clean:
 	rm -f *.o $(comicsplit)
+	rm -f comicsplit

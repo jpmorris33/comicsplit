@@ -15,7 +15,7 @@ void freePNGstruct(FILE *fp, png_structpp pngptr, png_infopp infoptr)	{
 	if (infoptr)
 	  png_free_data(*pngptr, *infoptr, PNG_FREE_ALL, -1);
 	if (pngptr)
-	    png_destroy_write_struct(pngptr,NULL);
+	    png_destroy_write_struct(pngptr,infoptr);
 }
 
 

@@ -48,9 +48,10 @@ if(!mainImage)	{
 filenum = 1;
 
 Image **vlist = SplitImageVertically(mainImage,&vlen);
+delete mainImage;
+
 if(!vlist)	{
   printf("Nothing to do\n");
-  delete mainImage;
   return;
 }
 
@@ -88,8 +89,6 @@ for(int y=0;y<vlen;y++)	{
 }
 free(vlist);
 vlist=NULL;
-
-delete mainImage;
 
 printf("done\n");
 }

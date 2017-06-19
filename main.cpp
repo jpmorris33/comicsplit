@@ -8,8 +8,10 @@ extern void process(const char *filein);
 
 int main(int argc, char *argv[])	{
   
+printf("comicsplit 1.01\n");
+
 if(argc < 2)	{
-    printf("Usage: pngsplit <file.png>\n");
+    printf("Usage: comicsplit <file.png>\n");
     exit(1);
 }  
 
