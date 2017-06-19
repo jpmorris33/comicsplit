@@ -75,8 +75,6 @@ Image *readPNG(const char* filename)
         int color_type = png_get_color_type(pngptr, infoptr);
         int bit_depth = png_get_bit_depth(pngptr, infoptr);
 
-//        int number_of_passes = png_set_interlace_handling(pngptr);
-        png_read_update_info(pngptr, infoptr);
 
 	// Ensure it's converted to straight 24-bit RGB
 
@@ -88,11 +86,13 @@ Image *readPNG(const char* filename)
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
 	    png_set_palette_to_rgb(pngptr);
 	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-	    png_set_gray_1_2_4_to_8(pngptr);
+	    png_set_expand_gray_1_2_4_to_8(pngptr);
 	if (png_get_valid(pngptr, infoptr, PNG_INFO_tRNS))
 	    png_set_tRNS_to_alpha(pngptr);
 	png_set_strip_alpha(pngptr);
-	
+
+        png_read_update_info(pngptr, infoptr);
+
         /* read file */
         if (setjmp(png_jmpbuf(pngptr)))	{
                 printf("Error during read_image\n");
